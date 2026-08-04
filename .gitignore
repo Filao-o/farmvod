@@ -1,0 +1,6 @@
+node_modules/
+.cache/
+credentials/
+projets/*/audio/
+projets/*/output/
+projets/*/background.*

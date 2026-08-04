@@ -1,0 +1,13 @@
+{
+  "graine": "deep-focus-01",
+  "video": {
+    "targetDurationMinutes": 180
+  },
+  "metadata": {
+    "titre": "Deep Focus — 3 Hours of Lofi Study Music",
+    "intro": "Trois heures de musique lo-fi pour travailler, réviser ou coder sans distraction.",
+    "outro": "Musique originale générée avec Suno.\nAbonne-toi pour ne rien manquer.",
+    "tags": ["lofi", "study music", "deep focus", "3 hours", "concentration"],
+    "citations": "deep-focus"
+  }
+}

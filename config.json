@@ -1,0 +1,38 @@
+{
+  "audio": {
+    "lufs": -14,
+    "truePeak": -1.5,
+    "crossfadeSeconds": 3,
+    "bitrate": "320k"
+  },
+  "video": {
+    "targetDurationMinutes": 180,
+    "fps": 30,
+    "gopSeconds": 2,
+    "crf": 20,
+    "preset": "fast",
+    "codec": "nvenc",
+    "upscaleTo4k": false,
+    "copyVideoStream": true
+  },
+  "metadata": {
+    "tags": ["lofi", "study music", "deep focus", "relaxing music", "concentration"],
+    "chapitresPremierPassageSeulement": true
+  },
+  "upload": {
+    "actif": false,
+    "categorieId": "10",
+    "playlistId": ""
+  },
+  "visualiseur": {
+    "actif": true,
+    "hauteurPourcent": 20,
+    "margeBas": 30,
+    "couleur": "0xF5E6C8",
+    "flouPrincipal": 1.5,
+    "flouSecondaire": 8,
+    "opacitePrincipale": 0.7,
+    "opaciteSecondaire": 0.28,
+    "decalageEcho": 6
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "suno-video-compiler",
+  "version": "2.0.0",
+  "description": "Compilation automatisee de videos longues (Suno -> YouTube) : normalisation loudness, fondus enchaines, encodage rapide, chapitres, upload prive.",
+  "main": "index.js",
+  "scripts": {
+    "build": "node index.js",
+    "batch": "node index.js --tous",
+    "clean": "node index.js --vider-cache"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {},
+  "optionalDependencies": {
+    "googleapis": "^144.0.0"
+  },
+  "license": "MIT"
+}
