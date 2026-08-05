@@ -37,6 +37,7 @@ function construireFiltreNowPlaying(cfg, dureeTotale, citations) {
     const escFont = (f) => f.replace(/\\/g, '/').replace(/:/g, '\\:');
     const fontRegular = escFont(np.police.regular);
     const fontBold = escFont(np.police.bold || np.police.regular);
+    const fontTemps = escFont(np.police.temps || np.police.regular);
 
     // Positions verticales (depuis le bas)
     const margeBasPct = np.positions.marge_bas_pct || 12;
@@ -116,11 +117,11 @@ function construireFiltreNowPlaying(cfg, dureeTotale, citations) {
     }
 
     parts.push(
-        `[avecBarre]drawtext=text='${exprCur}':fontfile='${fontRegular}':fontsize=${tailleTemps}:` +
+        `[avecBarre]drawtext=text='${exprCur}':fontfile='${fontTemps}':fontsize=${tailleTemps}:` +
         `fontcolor=${couleurTexte}@0.72:x=${barX}:y=${yTemps}[avecTempsA]`
     );
     parts.push(
-        `[avecTempsA]drawtext=text='${exprRem}':fontfile='${fontRegular}':fontsize=${tailleTemps}:` +
+        `[avecTempsA]drawtext=text='${exprRem}':fontfile='${fontTemps}':fontsize=${tailleTemps}:` +
         `fontcolor=${couleurTexte}@0.72:x=${barX + largeurBarre}-text_w:y=${yTemps}[avecTemps]`
     );
 

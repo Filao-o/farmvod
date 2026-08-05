@@ -17,7 +17,7 @@ const DEFAULTS = {
         fps: 30,
         gopSeconds: 2,
         crf: 20,
-        preset: 'fast',
+        preset: 'ultrafast',
         codec: 'nvenc',
         upscaleTo4k: false,
     },
@@ -62,6 +62,9 @@ const DEFAULTS = {
             bold: process.platform === 'win32'
                 ? process.env.LOCALAPPDATA + '/Microsoft/Windows/Fonts/SFUIDisplay-Bold.ttf'
                 : '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            temps: process.platform === 'win32'
+                ? process.env.LOCALAPPDATA + '/Microsoft/Windows/Fonts/SFUIDisplay-Light.ttf'
+                : '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         },
     },
     upload: {

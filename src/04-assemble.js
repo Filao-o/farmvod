@@ -83,6 +83,7 @@ async function assembler(cfg, audio, visuel) {
 
     const args = [
         '-y',
+        '-threads', '0',
         ...inputs,
         '-filter_complex_script', filterScript,
         '-map', mapVideo,

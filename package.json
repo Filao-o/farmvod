@@ -6,10 +6,14 @@
   "scripts": {
     "build": "node index.js",
     "batch": "node index.js --tous",
-    "clean": "node index.js --vider-cache"
+    "clean": "node index.js --vider-cache",
+    "app": "electron electron/main.js",
+    "start": "electron electron/main.js"
   },
   "engines": { "node": ">=18" },
-  "dependencies": {},
+  "dependencies": {
+    "electron": "^33.0.0"
+  },
   "optionalDependencies": {
     "googleapis": "^144.0.0"
   },
