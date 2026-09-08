@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 title Suno Video Compiler
-cd /d "C:\Lucas\YouTube\suno-video-compiler"
+cd /d "%~dp0"
 
 echo ================================================
 echo   PRODUCTION D'UNE VIDEO LONGUE
