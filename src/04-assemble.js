@@ -6,21 +6,17 @@ const { ffmpeg, log, ensureDir, hms, bytesToMo, progressReporter, duration } = r
 const { construireFiltreNowPlaying } = require('./04-nowplaying-filter');
 
 async function verifierCodec(codec) {
-    if (codec !== 'nvenc' && codec !== 'h264_nvenc') return;
+    if (codec !== 'nvenc' && codec !== 'h264_nvenc') return codec;
     const { execSync } = require('child_process');
     let dispo = '';
     try {
         dispo = execSync('ffmpeg -hide_banner -encoders', { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
     } catch (e) { /* ignoré */ }
     if (!dispo.includes('h264_nvenc')) {
-        throw new Error(
-            'Encodeur NVENC introuvable. Vérifie :\n' +
-            '   - carte NVIDIA compatible (GTX 10xx ou plus récent) ;\n' +
-            '   - pilotes NVIDIA à jour ;\n' +
-            '   - FFmpeg installé via winget/Gyan (support NVENC intégré).\n' +
-            '   Test dans un terminal :  ffmpeg -encoders | findstr nvenc'
-        );
+        log.warn('NVENC non disponible — fallback automatique vers libx264 (encodage CPU).');
+        return 'libx264';
     }
+    return codec;
 }
 
 function paramsCodec(codec, cfg) {
@@ -50,8 +46,7 @@ function paramsCodec(codec, cfg) {
 async function assembler(cfg, audio, visuel) {
     log.step('Étape 4/5 — Assemblage final');
 
-    const codec = (cfg.video.codec || 'libx264').toLowerCase();
-    await verifierCodec(codec);
+    const codec = await verifierCodec((cfg.video.codec || 'libx264').toLowerCase());
 
     ensureDir(cfg.dossierSortie);
     const sortie = path.join(cfg.dossierSortie, `${cfg.nom}.mp4`);

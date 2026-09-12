@@ -132,6 +132,43 @@ suno-video-compiler/
 - ~~Génération pochettes via API~~ : abandonné, images libres de droit suffisent pour la 1ère chaîne.
 - ~~Teinte halo dynamique~~ : abandonné, halo blanc figé.
 
+## Branding — LucidityFM
+
+### Channel identity
+- **Name**: LucidityFM
+- **Niche**: Ambient music for deep work — not bland or tasteless, designed to accompany the brain
+- **Format**: 45 min to 1h20 sessions, 2 videos/week
+- **Music source**: Keep vague (AI-generated via Suno, but never stated publicly)
+
+### Audience
+- Entrepreneurs, developers, programmers, remote workers, freelancers
+- **Pain points to hit**: procrastination, attention loss, lack of focus, loneliness of solo work
+- People who know they should be working but keep scrolling instead
+
+### Tone & voice
+- **Direct, confrontational, like a coach who talks tough because it works**
+- Not motivational-poster fluff — raw, slightly abrasive, honest
+- Speaks TO the viewer, not AT them ("You keep telling yourself you'll start in 5 minutes. You won't.")
+- Underlying message: I'm pushing you because I know you can do it
+
+### Style rules for titles, descriptions, thumbnails
+- English only
+- Short, punchy titles — hit a nerve, not a keyword
+- Minimalist thumbnails — no clutter, no clickbait faces
+- No begging for likes/subs — the work speaks for itself
+- Citations/quotes in videos: focus, discipline, solitude, deep work themes
+
+### Channel description
+> Your brain wasn't built for notifications. It was built for this.
+>
+> Long-form ambient music designed to shut the noise out and let the work in. No lyrics. No distractions. Just sound that gets out of your way while your brain does what it's supposed to do.
+>
+> You keep telling yourself you'll "start in 5 minutes." You won't. You'll scroll, you'll snack, you'll reorganize your desktop for the third time today. Meanwhile the deadline hasn't moved and neither have you.
+>
+> Hit play. Lock in. That's it.
+>
+> New sessions drop twice a week — 45 min to 1h+ of uninterrupted focus fuel for the ones who actually want to get something done today.
+
 ## Style de collaboration attendu
 
 - **Édits ciblés** (str_replace) plutôt que réécritures complètes
