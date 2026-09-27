@@ -3,7 +3,6 @@
 const fs = require('fs');
 const path = require('path');
 const { ffmpeg, log, ensureDir, hms, bytesToMo, progressReporter, duration } = require('./utils');
-const { construireFiltreNowPlaying } = require('./04-nowplaying-filter');
 
 async function verifierCodec(codec) {
     if (codec !== 'nvenc' && codec !== 'h264_nvenc') return codec;
@@ -44,7 +43,7 @@ function paramsCodec(codec, cfg) {
 }
 
 async function assembler(cfg, audio, visuel) {
-    log.step('Étape 4/5 — Assemblage final');
+    log.step('Étape 4/5 — Assemblage final (image fixe + audio)');
 
     const codec = await verifierCodec((cfg.video.codec || 'libx264').toLowerCase());
 
@@ -53,37 +52,21 @@ async function assembler(cfg, audio, visuel) {
     if (fs.existsSync(sortie)) fs.unlinkSync(sortie);
 
     const dureeTotale = cfg._modeTest ? Math.min(audio.duree, cfg._modeTest) : audio.duree;
+    const W = cfg.video.upscaleTo4k ? 3840 : 1920;
+    const H = cfg.video.upscaleTo4k ? 2160 : 1080;
 
-    // Ajuster les citations à la durée réelle
-    const citationsActives = visuel.citations
-        .filter((c) => c.debut < dureeTotale)
-        .map((c) => ({ ...c, fin: Math.min(c.fin, dureeTotale) }));
-
-    log.info(`Cible : ${hms(dureeTotale)} — ${citationsActives.length} citation(s)`);
-
-    cfg._masterAudio = audio.master;
-    cfg._backgroundImage = visuel.background;
-    cfg._barBg = visuel.barBg;
-    cfg._barFill = visuel.barFill;
-    const { filter, inputs, mapVideo } = construireFiltreNowPlaying(cfg, dureeTotale, citationsActives);
-
-    // Sauvegarde du filter graph pour debug
-    const filterFile = path.join(cfg.dossierSortie, `${cfg.nom}.filter.txt`);
-    fs.writeFileSync(filterFile, filter, 'utf-8');
-    log.info(`Filter graph sauvegardé : ${path.basename(filterFile)} (${filter.length} caractères)`);
-
-    const filterScript = path.join(cfg.cache, `filter_${cfg.nom}_${Date.now()}.txt`);
-    ensureDir(path.dirname(filterScript));
-    fs.writeFileSync(filterScript, filter, 'utf-8');
+    log.info(`Cible : ${hms(dureeTotale)} — image fixe ${W}×${H}`);
 
     const args = [
         '-y',
-        '-threads', '0',
-        ...inputs,
-        '-filter_complex_script', filterScript,
-        '-map', mapVideo,
-        '-map', '0:a:0',
+        '-loop', '1',
+        '-framerate', String(cfg.video.fps),
+        '-i', visuel.background,
+        '-i', audio.master,
+        '-vf', `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,format=yuv420p`,
+        '-shortest',
         ...paramsCodec(codec, cfg),
+        '-g', String(cfg.video.fps * cfg.video.gopSeconds),
         '-c:a', 'aac',
         '-b:a', cfg.audio.bitrate,
         '-ar', String(cfg.audio.sampleRate),
@@ -94,11 +77,7 @@ async function assembler(cfg, audio, visuel) {
     ];
 
     const debut = Date.now();
-    try {
-        await ffmpeg(args, { onStderr: progressReporter('Encodage', dureeTotale) });
-    } finally {
-        if (fs.existsSync(filterScript)) fs.unlinkSync(filterScript);
-    }
+    await ffmpeg(args, { onStderr: progressReporter('Encodage', dureeTotale) });
     process.stdout.write('\n');
 
     const minutes = ((Date.now() - debut) / 60000).toFixed(1);

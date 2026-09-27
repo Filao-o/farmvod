@@ -73,7 +73,7 @@ async function compiler(nomProjet, options) {
 
     const pistes = await normaliser(cfg);
     const audio = await monterPlaylist(cfg, pistes);
-    const visuel = await preparerNowPlaying(cfg, audio.tracklist);
+    const visuel = await preparerNowPlaying(cfg);
     const video = await assembler(cfg, audio, visuel);
     const meta = await genererMetadonnees(cfg, audio, video, { fichier: visuel.background }, pistes);
 
