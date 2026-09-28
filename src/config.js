@@ -30,42 +30,8 @@ const DEFAULTS = {
         intro: '',
         outro: 'Musique générée avec Suno. Toute reproduction non autorisée est interdite.',
         tags: [],
-        citations: '',
         genererChapitres: true,
         chapitresPremierPassageSeulement: true,
-    },
-    nowplaying: {
-        citation_intervalle_min: 5,
-        citation_fade_sec: 1,
-        typographie: {
-            taille_citation: 30,
-            taille_auteur: 22,
-            taille_temps: 16,
-            epaisseur_barre_px: 8,
-            espace_citation_auteur: 40,
-            espace_auteur_barre: 87,
-        },
-        couleurs: {
-            texte: 'black',
-            barre: 'black',
-            barre_fond_couleur: 'black',
-            barre_fond_opacite: 0.15,
-        },
-        positions: {
-            marge_bas_pct: 12,
-            marge_laterale_pct: 8,
-        },
-        police: {
-            regular: process.platform === 'win32'
-                ? process.env.LOCALAPPDATA + '/Microsoft/Windows/Fonts/SFUIDisplay-Light.ttf'
-                : '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-            bold: process.platform === 'win32'
-                ? process.env.LOCALAPPDATA + '/Microsoft/Windows/Fonts/SFUIDisplay-Bold.ttf'
-                : '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-            temps: process.platform === 'win32'
-                ? process.env.LOCALAPPDATA + '/Microsoft/Windows/Fonts/SFUIDisplay-Light.ttf'
-                : '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        },
     },
     upload: {
         actif: false,

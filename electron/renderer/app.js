@@ -6,8 +6,6 @@ const $$ = (s) => document.querySelectorAll(s);
 let currentProjet = null;
 let pistes = [];
 let projetConfig = {};
-let fontCitePath = '';
-let fontTempsPath = '';
 
 // ── SVG icons ───────────────────────────────────────────────────────
 const ICON = {
@@ -32,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function showView(name) {
     $$('.view').forEach(v => v.classList.remove('active'));
     $(`#view-${name}`).classList.add('active');
-    if (name === 'config') requestAnimationFrame(updatePreview);
+    if (name === 'config') loadConfigValues();
 }
 
 function setupNavigation() {
@@ -223,16 +221,6 @@ function setupProject() {
         }
     });
 
-    // Citations
-    loadCitationsList();
-    $('#btn-add-citation').addEventListener('click', async () => {
-        const nom = await window.api.addCitationFile();
-        if (nom) {
-            await loadCitationsList();
-            $('#citations-select').value = nom;
-        }
-    });
-
     // Settings button → config view
     $('#btn-settings').addEventListener('click', () => {
         showView('config');
@@ -258,20 +246,12 @@ async function openProject(nom) {
     await refreshBackground();
     projetConfig = await window.api.readConfig(nom);
     loadProjectConfigValues();
-    loadCitationSelection();
 }
 
 function loadProjectConfigValues() {
     const cfg = projetConfig;
     setVal('#cfg-duree', getPath(cfg, 'video.targetDurationMinutes'));
     setVal('#cfg-crossfade', getPath(cfg, 'audio.crossfadeSeconds'));
-}
-
-function loadCitationSelection() {
-    const cite = getPath(projetConfig, 'metadata.citations');
-    if (cite) $('#citations-select').value = cite;
-    const toggle = getPath(projetConfig, 'metadata.citationsActives');
-    $('#citations-toggle').checked = toggle !== false;
 }
 
 async function refreshPistes() {
@@ -392,55 +372,10 @@ async function refreshBackground() {
     }
 }
 
-async function loadCitationsList() {
-    const themes = await window.api.listCitations();
-    const select = $('#citations-select');
-    const current = select.value;
-    select.innerHTML = '<option value="">Aucune</option>';
-    themes.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = t;
-        select.appendChild(opt);
-    });
-    if (current) select.value = current;
-}
-
 // ═══════════════════════════════════════════════════════════════════
 // VIEW 2 : CONFIG / PREVIEW
 // ═══════════════════════════════════════════════════════════════════
 function setupConfig() {
-    // Preview listeners
-    const previewIds = [
-        'cfg-taille-citation', 'cfg-taille-auteur', 'cfg-taille-temps',
-        'cfg-epaisseur-barre', 'cfg-couleur-texte', 'cfg-couleur-barre',
-        'cfg-espace-cite-auteur', 'cfg-espace-auteur-barre',
-        'cfg-marge-bas', 'cfg-marge-lat',
-    ];
-    previewIds.forEach(id => {
-        const el = $(`#${id}`);
-        if (el) {
-            el.addEventListener('input', updatePreview);
-            el.addEventListener('change', updatePreview);
-        }
-    });
-
-    // Font pickers
-    $('#btn-font-cite').addEventListener('click', async () => {
-        const f = await window.api.browseFont();
-        if (f) {
-            fontCitePath = f;
-            $('#btn-font-cite').textContent = f.split(/[/\\]/).pop().replace(/\.\w+$/, '');
-        }
-    });
-    $('#btn-font-temps').addEventListener('click', async () => {
-        const f = await window.api.browseFont();
-        if (f) {
-            fontTempsPath = f;
-            $('#btn-font-temps').textContent = f.split(/[/\\]/).pop().replace(/\.\w+$/, '');
-        }
-    });
-
     // Save
     $('#btn-save-config').addEventListener('click', saveAllConfig);
 
@@ -450,128 +385,20 @@ function setupConfig() {
 
 function loadConfigValues() {
     const cfg = projetConfig;
-    setVal('#cfg-couleur-texte', getPath(cfg, 'nowplaying.couleurs.texte'), 'color');
-    setVal('#cfg-couleur-barre', getPath(cfg, 'nowplaying.couleurs.barre'), 'color');
     setVal('#cfg-fps', getPath(cfg, 'video.fps'));
-    setVal('#cfg-taille-citation', getPath(cfg, 'nowplaying.typographie.taille_citation'));
-    setVal('#cfg-taille-auteur', getPath(cfg, 'nowplaying.typographie.taille_auteur'));
-    setVal('#cfg-taille-temps', getPath(cfg, 'nowplaying.typographie.taille_temps'));
-    setVal('#cfg-epaisseur-barre', getPath(cfg, 'nowplaying.typographie.epaisseur_barre_px'));
-    setVal('#cfg-espace-cite-auteur', getPath(cfg, 'nowplaying.typographie.espace_citation_auteur'));
-    setVal('#cfg-espace-auteur-barre', getPath(cfg, 'nowplaying.typographie.espace_auteur_barre'));
-    setVal('#cfg-marge-bas', getPath(cfg, 'nowplaying.positions.marge_bas_pct'));
-    setVal('#cfg-marge-lat', getPath(cfg, 'nowplaying.positions.marge_laterale_pct'));
-    setVal('#cfg-citation-intervalle', getPath(cfg, 'nowplaying.citation_intervalle_min'));
-    setVal('#cfg-citation-fade', getPath(cfg, 'nowplaying.citation_fade_sec'));
-
-    // Font labels
-    const fontCite = getPath(cfg, 'nowplaying.police.regular');
-    const fontTemps = getPath(cfg, 'nowplaying.police.temps');
-    if (fontCite) {
-        fontCitePath = fontCite;
-        $('#btn-font-cite').textContent = fontCite.split(/[/\\]/).pop().replace(/\.\w+$/, '');
-    }
-    if (fontTemps) {
-        fontTempsPath = fontTemps;
-        $('#btn-font-temps').textContent = fontTemps.split(/[/\\]/).pop().replace(/\.\w+$/, '');
-    }
-
-    updatePreview();
 }
 
 async function saveAllConfig() {
     if (!currentProjet) return;
     let cfg = await window.api.readConfig(currentProjet);
 
-    // Project view values
-    setPath(cfg, 'nowplaying.couleurs.texte', hexToName($('#cfg-couleur-texte').value));
-    setPath(cfg, 'nowplaying.couleurs.barre', hexToName($('#cfg-couleur-barre').value));
     setPath(cfg, 'video.targetDurationMinutes', int('#cfg-duree'));
     setPath(cfg, 'audio.crossfadeSeconds', float('#cfg-crossfade'));
     setPath(cfg, 'video.fps', int('#cfg-fps'));
 
-    // Config view values
-    setPath(cfg, 'nowplaying.typographie.taille_citation', int('#cfg-taille-citation'));
-    setPath(cfg, 'nowplaying.typographie.taille_auteur', int('#cfg-taille-auteur'));
-    setPath(cfg, 'nowplaying.typographie.taille_temps', int('#cfg-taille-temps'));
-    setPath(cfg, 'nowplaying.typographie.epaisseur_barre_px', int('#cfg-epaisseur-barre'));
-    setPath(cfg, 'nowplaying.typographie.espace_citation_auteur', int('#cfg-espace-cite-auteur'));
-    setPath(cfg, 'nowplaying.typographie.espace_auteur_barre', int('#cfg-espace-auteur-barre'));
-    setPath(cfg, 'nowplaying.positions.marge_bas_pct', int('#cfg-marge-bas'));
-    setPath(cfg, 'nowplaying.positions.marge_laterale_pct', int('#cfg-marge-lat'));
-    setPath(cfg, 'nowplaying.citation_intervalle_min', int('#cfg-citation-intervalle'));
-    setPath(cfg, 'nowplaying.citation_fade_sec', float('#cfg-citation-fade'));
-
-    // Fonts
-    if (fontCitePath) {
-        setPath(cfg, 'nowplaying.police.regular', fontCitePath);
-        setPath(cfg, 'nowplaying.police.bold', fontCitePath);
-    }
-    if (fontTempsPath) {
-        setPath(cfg, 'nowplaying.police.temps', fontTempsPath);
-    }
-
-    // Citations
-    const citeVal = $('#citations-select').value;
-    if (citeVal) setPath(cfg, 'metadata.citations', citeVal);
-    else if (cfg.metadata) delete cfg.metadata.citations;
-    setPath(cfg, 'metadata.citationsActives', $('#citations-toggle').checked);
-
     await window.api.saveConfig(currentProjet, JSON.stringify(cfg, null, 2));
     projetConfig = cfg;
     showToast('Configuration sauvegardée');
-}
-
-// ── Preview ─────────────────────────────────────────────────────────
-function updatePreview() {
-    const frame = $('#preview-frame');
-    if (!frame) return;
-    const scale = 0.5;
-    const W = 960;
-    const H = 540;
-
-    const tailleCite = parseFloat($('#cfg-taille-citation').value || 30) * scale;
-    const tailleAuteur = parseFloat($('#cfg-taille-auteur').value || 22) * scale;
-    const tailleTemps = parseFloat($('#cfg-taille-temps').value || 16) * scale;
-    const epaisseur = Math.max(2, parseFloat($('#cfg-epaisseur-barre').value || 8) * scale);
-    const espaceCiteAuteur = parseFloat($('#cfg-espace-cite-auteur').value || 40) * scale;
-    const espaceAuteurBarre = parseFloat($('#cfg-espace-auteur-barre').value || 87) * scale;
-    const margeBasPct = parseFloat($('#cfg-marge-bas').value || 12);
-    const margeLatPct = parseFloat($('#cfg-marge-lat').value || 8);
-
-    const couleurTexte = $('#cfg-couleur-texte').value;
-    const couleurBarre = $('#cfg-couleur-barre').value;
-
-    const margeBas = H * margeBasPct / 100;
-    const margeLat = W * margeLatPct / 100;
-    const barY = H - margeBas;
-    const largeurBarre = W - margeLat * 2;
-
-    const yAuteur = barY - espaceAuteurBarre;
-    const yCite = yAuteur - tailleAuteur - espaceCiteAuteur;
-    const yTemps = barY + epaisseur + 4 * scale;
-
-    apply('#preview-citation', { top: yCite, fontSize: tailleCite, color: couleurTexte, padding: `0 ${margeLat}px` });
-    apply('#preview-auteur', { top: yAuteur, fontSize: tailleAuteur, color: couleurTexte, padding: `0 ${margeLat}px` });
-
-    const barBg = $('#preview-bar-bg');
-    Object.assign(barBg.style, {
-        left: margeLat + 'px', top: barY + 'px',
-        width: largeurBarre + 'px', height: epaisseur + 'px',
-        backgroundColor: couleurBarre, opacity: '0.15',
-    });
-    $('#preview-bar-fill').style.backgroundColor = couleurBarre;
-
-    apply('#preview-time-left', { top: yTemps, fontSize: tailleTemps, color: couleurTexte, left: margeLat + 'px', right: 'auto' });
-    apply('#preview-time-right', { top: yTemps, fontSize: tailleTemps, color: couleurTexte, right: margeLat + 'px', left: 'auto' });
-}
-
-function apply(sel, props) {
-    const el = $(sel);
-    if (!el) return;
-    for (const [k, v] of Object.entries(props)) {
-        el.style[k] = typeof v === 'number' ? v + 'px' : v;
-    }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -712,17 +539,6 @@ function setVal(sel, val, type) {
 
 function int(sel) { return parseInt($(sel).value) || 0; }
 function float(sel) { return parseFloat($(sel).value) || 0; }
-
-function nameToHex(name) {
-    if (name && name.startsWith('#')) return name;
-    const map = { black: '#000000', white: '#ffffff', red: '#ff0000', blue: '#0000ff', green: '#008000' };
-    return map[name] || '#000000';
-}
-
-function hexToName(hex) {
-    const map = { '#000000': 'black', '#ffffff': 'white' };
-    return map[hex] || hex;
-}
 
 function showToast(msg) {
     const el = $('#toast');
