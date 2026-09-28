@@ -16,7 +16,7 @@ if "%PROJET%"=="" goto fin
 
 echo.
 echo Mode de rendu :
-echo   1 = Test rapide (30 secondes, pour valider les visuels)
+echo   1 = Test rapide (30 secondes, pour tester rapidement)
 echo   2 = Production complete (duree cible du projet)
 echo.
 set /p MODE="Choix (1 ou 2) : "

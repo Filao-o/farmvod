@@ -30,11 +30,9 @@ const DEFAULTS = {
         intro: '',
         outro: 'Musique générée avec Suno. Toute reproduction non autorisée est interdite.',
         tags: [],
-        citations: '',
         genererChapitres: true,
         chapitresPremierPassageSeulement: true,
     },
-    nowplaying: {},
     upload: {
         actif: false,
         confidentialite: 'private',

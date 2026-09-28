@@ -8,7 +8,7 @@ const { loadConfig } = require('./src/config');
 const { log, checkTools, hms, ensureDir } = require('./src/utils');
 const { normaliser } = require('./src/01-normalize');
 const { monterPlaylist } = require('./src/02-playlist');
-const { preparerNowPlaying } = require('./src/03-nowplaying');
+const { preparerBackground } = require('./src/03-background');
 const { assembler } = require('./src/04-assemble');
 const { genererMetadonnees } = require('./src/05-metadata');
 
@@ -31,7 +31,7 @@ function parserArguments(argv) {
 
 function aide() {
     console.log(`
-  Compilateur de vidéos longues — Suno → YouTube (mode "Now Playing")
+  Compilateur de vidéos longues — Suno → YouTube
 
   Usage :
     node index.js --projet <nom>            Compile un projet
@@ -42,8 +42,8 @@ function aide() {
 
   Un projet = un dossier dans projets/ contenant :
     audio/           les pistes téléchargées depuis Suno
-    pochettes/       une image par piste (même nom que l'audio, .jpg/.png)
-    projet.json      titre, tags, citations, durée cible…
+    background.jpg   image fixe (vignette + vidéo)
+    projet.json      titre, tags, durée cible…
 `);
 }
 
@@ -73,7 +73,7 @@ async function compiler(nomProjet, options) {
 
     const pistes = await normaliser(cfg);
     const audio = await monterPlaylist(cfg, pistes);
-    const visuel = await preparerNowPlaying(cfg);
+    const visuel = await preparerBackground(cfg);
     const video = await assembler(cfg, audio, visuel);
     const meta = await genererMetadonnees(cfg, audio, video, { fichier: visuel.background }, pistes);
 

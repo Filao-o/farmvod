@@ -14,7 +14,7 @@ function trouverBackground(dossierProjet) {
     return null;
 }
 
-async function preparerNowPlaying(cfg) {
+async function preparerBackground(cfg) {
     log.step('Étape 3/5 — Préparation visuelle');
 
     const background = trouverBackground(cfg.dossierProjet);
@@ -29,4 +29,4 @@ async function preparerNowPlaying(cfg) {
     return { background };
 }
 
-module.exports = { preparerNowPlaying };
+module.exports = { preparerBackground };

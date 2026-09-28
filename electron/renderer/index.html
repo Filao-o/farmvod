@@ -67,24 +67,12 @@
                     </div>
                 </div>
 
-                <!-- Mid row: upload + citations -->
+                <!-- Mid row: upload audio -->
                 <div class="project-mid">
                     <button id="btn-upload-audio" class="btn btn-outline">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 5l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                         Upload une musique
                     </button>
-                    <div class="citations-row">
-                        <label class="toggle-wrap" title="Activer/désactiver les citations">
-                            <input type="checkbox" id="citations-toggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <select id="citations-select">
-                            <option value="">Aucune</option>
-                        </select>
-                        <button id="btn-add-citation" class="btn-icon btn-small" title="Ajouter un fichier de citations">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Track list -->
@@ -113,41 +101,12 @@
             <div class="config-body">
                 <div id="preview-frame">
                     <img id="preview-bg" alt="">
-                    <div id="preview-citation">"The secret of getting ahead is getting started."</div>
-                    <div id="preview-auteur">Mark Twain</div>
-                    <div id="preview-bar-bg"><div id="preview-bar-fill"></div></div>
-                    <div id="preview-time-left">12:34</div>
-                    <div id="preview-time-right">1:47:26</div>
                 </div>
 
                 <div class="config-controls">
                     <div class="card config-panel">
-                        <h3>Typographie</h3>
-                        <label>Taille Citation <input type="number" id="cfg-taille-citation" min="10" max="80" value="30"></label>
-                        <label>Taille Auteur <input type="number" id="cfg-taille-auteur" min="10" max="60" value="22"></label>
-                        <label>Taille Temps <input type="number" id="cfg-taille-temps" min="8" max="40" value="16"></label>
-                        <label>Épaisseur barre <input type="number" id="cfg-epaisseur-barre" min="2" max="20" value="8"></label>
-                    </div>
-                    <div class="card config-panel">
-                        <h3>Espacement</h3>
-                        <label>Espace Citation/Auteur <input type="number" id="cfg-espace-cite-auteur" min="0" max="100" value="40"></label>
-                        <label>Espace Auteur/Barre <input type="number" id="cfg-espace-auteur-barre" min="0" max="200" value="87"></label>
-                        <label>Marge Bas (%) <input type="number" id="cfg-marge-bas" min="1" max="40" value="12"></label>
-                        <label>Marge Latérale (%) <input type="number" id="cfg-marge-lat" min="1" max="30" value="8"></label>
-                    </div>
-                    <div class="card config-panel">
-                        <h3>Polices & Couleurs</h3>
-                        <label>Citation / Auteur
-                            <button id="btn-font-cite" class="btn btn-outline btn-font" title="Choisir la police">SF UI Display</button>
-                        </label>
-                        <label>Temps
-                            <button id="btn-font-temps" class="btn btn-outline btn-font" title="Choisir la police">SF UI Display</button>
-                        </label>
-                        <label>Couleur Texte <input type="color" id="cfg-couleur-texte" value="#000000"></label>
-                        <label>Couleur Barre <input type="color" id="cfg-couleur-barre" value="#000000"></label>
+                        <h3>Vidéo</h3>
                         <label>FPS <input type="number" id="cfg-fps" min="24" max="60" value="30"></label>
-                        <label>Intervalle citation (min) <input type="number" id="cfg-citation-intervalle" min="1" max="30" value="5"></label>
-                        <label>Fade citation (sec) <input type="number" id="cfg-citation-fade" min="0" max="5" step="0.5" value="1"></label>
                     </div>
                 </div>
 

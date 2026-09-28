@@ -22,7 +22,7 @@ Le rendu final est une image fixe plein écran + audio normalisé avec crossfade
 audio Suno + background.jpg
     ↓ [01-normalize.js]  loudnorm 2 passes → -14 LUFS
     ↓ [02-playlist.js]   fondus enchaînés, ordre remélangé par passage
-    ↓ [03-nowplaying.js] vérifie la présence du background
+    ↓ [03-background.js] vérifie la présence du background
     ↓ [04-assemble.js]   image fixe + audio → MP4 (NVENC ou libx264)
     ↓ [05-metadata.js]   description, chapitres, miniature
     ↓ [06-upload.js]     upload YouTube en PRIVÉ (validation humaine obligatoire)
@@ -86,7 +86,7 @@ suno-video-compiler/
 │   ├── utils.js
 │   ├── 01-normalize.js
 │   ├── 02-playlist.js
-│   ├── 03-nowplaying.js
+│   ├── 03-background.js
 │   ├── 04-assemble.js
 │   ├── 05-metadata.js
 │   └── 06-upload.js
@@ -127,7 +127,7 @@ suno-video-compiler/
 - Short, punchy titles — hit a nerve, not a keyword
 - Minimalist thumbnails — no clutter, no clickbait faces
 - No begging for likes/subs — the work speaks for itself
-- Citations/quotes in videos: focus, discipline, solitude, deep work themes
+- Descriptions: focus, discipline, solitude, deep work themes
 
 ### Channel description
 > Your brain wasn't built for notifications. It was built for this.
