@@ -11,7 +11,7 @@ async function verifierCodec(codec) {
     const tmp = path.join(os.tmpdir(), `nvenc-probe-${process.pid}.mp4`);
     try {
         execSync(
-            `ffmpeg -hide_banner -y -f lavfi -i color=black:s=64x64:d=0.04 -frames:v 1 -c:v h264_nvenc "${tmp}"`,
+            `ffmpeg -hide_banner -y -f lavfi -i color=black:s=256x256:d=0.04 -frames:v 1 -c:v h264_nvenc "${tmp}"`,
             { stdio: 'pipe', timeout: 10000 },
         );
         return codec;
