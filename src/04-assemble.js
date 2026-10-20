@@ -7,15 +7,16 @@ const { ffmpeg, log, ensureDir, hms, bytesToMo, progressReporter, duration } = r
 async function verifierCodec(codec) {
     if (codec !== 'nvenc' && codec !== 'h264_nvenc') return codec;
     const { execSync } = require('child_process');
-    let dispo = '';
     try {
-        dispo = execSync('ffmpeg -hide_banner -encoders', { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
-    } catch (e) { /* ignoré */ }
-    if (!dispo.includes('h264_nvenc')) {
+        execSync(
+            'ffmpeg -hide_banner -f lavfi -i nullsrc=s=64x64:d=0.1 -c:v h264_nvenc -f null -',
+            { stdio: 'pipe', timeout: 10000 },
+        );
+        return codec;
+    } catch {
         log.warn('NVENC non disponible — fallback automatique vers libx264 (encodage CPU).');
         return 'libx264';
     }
-    return codec;
 }
 
 function paramsCodec(codec, cfg) {
