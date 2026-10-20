@@ -33,7 +33,7 @@ function paramsCodec(codec, cfg) {
             '-rc', 'vbr',
             '-cq', String(cfg.video.crf),
             '-b:v', '0',
-            '-spatial_aq', '1',
+            '-spatial-aq', '1',
         ];
     }
     return [
