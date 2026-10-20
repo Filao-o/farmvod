@@ -7,15 +7,19 @@ const { ffmpeg, log, ensureDir, hms, bytesToMo, progressReporter, duration } = r
 async function verifierCodec(codec) {
     if (codec !== 'nvenc' && codec !== 'h264_nvenc') return codec;
     const { execSync } = require('child_process');
+    const os = require('os');
+    const tmp = path.join(os.tmpdir(), `nvenc-probe-${process.pid}.mp4`);
     try {
         execSync(
-            'ffmpeg -hide_banner -f lavfi -i nullsrc=s=64x64:d=0.1 -c:v h264_nvenc -f null -',
+            `ffmpeg -hide_banner -y -f lavfi -i color=black:s=64x64:d=0.04 -frames:v 1 -c:v h264_nvenc "${tmp}"`,
             { stdio: 'pipe', timeout: 10000 },
         );
         return codec;
     } catch {
         log.warn('NVENC non disponible — fallback automatique vers libx264 (encodage CPU).');
         return 'libx264';
+    } finally {
+        try { fs.unlinkSync(tmp); } catch {}
     }
 }
 
