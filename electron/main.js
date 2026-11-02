@@ -162,13 +162,6 @@ function getBackgroundPath(projet) {
     return null;
 }
 
-// ── Citations ───────────────────────────────────────────────────────
-function listerFichiersCitations() {
-    const dir = path.join(RACINE, 'citations');
-    if (!fs.existsSync(dir)) return [];
-    return fs.readdirSync(dir).filter(f => f.endsWith('.txt')).map(f => path.parse(f).name);
-}
-
 // ── Pipeline execution ──────────────────────────────────────────────
 let pipelineProcess = null;
 
@@ -226,8 +219,6 @@ ipcMain.handle('audio:reorder', (_, projet, orderedFiles) => renumerotePistes(pr
 ipcMain.handle('background:set', (_, projet, chemin) => setBackground(projet, chemin));
 ipcMain.handle('background:get', (_, projet) => getBackgroundPath(projet));
 
-ipcMain.handle('citations:list', () => listerFichiersCitations());
-
 ipcMain.handle('pipeline:run', (_, projet, test) => lancerPipeline(projet, test));
 ipcMain.handle('pipeline:running', () => pipelineProcess !== null);
 
@@ -247,37 +238,6 @@ ipcMain.handle('config:save', (_, projet, jsonStr) => {
 ipcMain.handle('config:read', (_, projet) => {
     const fichier = path.join(projetsDir(), projet, 'projet.json');
     try { return JSON.parse(fs.readFileSync(fichier, 'utf-8')); } catch { return {}; }
-});
-
-ipcMain.handle('fonts:browse', async () => {
-    const result = await dialog.showOpenDialog(win, {
-        title: 'Choisir une police',
-        filters: [{ name: 'Polices', extensions: ['ttf', 'otf', 'woff', 'woff2'] }],
-        properties: ['openFile'],
-    });
-    return result.canceled ? null : result.filePaths[0];
-});
-
-ipcMain.handle('citations:openFile', (_, theme) => {
-    const fichier = path.join(RACINE, 'citations', `${theme}.txt`);
-    if (fs.existsSync(fichier)) shell.openPath(fichier);
-});
-
-ipcMain.handle('citations:addFile', async () => {
-    const result = await dialog.showOpenDialog(win, {
-        title: 'Ajouter un fichier de citations',
-        filters: [{ name: 'Citations', extensions: ['txt'] }],
-        properties: ['openFile'],
-    });
-    if (result.canceled) return null;
-    const src = result.filePaths[0];
-    const nom = path.parse(src).name;
-    const dest = path.join(RACINE, 'citations', `${nom}.txt`);
-    if (!fs.existsSync(path.join(RACINE, 'citations'))) {
-        fs.mkdirSync(path.join(RACINE, 'citations'), { recursive: true });
-    }
-    fs.copyFileSync(src, dest);
-    return nom;
 });
 
 ipcMain.handle('projets:outputInfo', (_, nom) => {

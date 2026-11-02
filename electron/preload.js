@@ -21,15 +21,9 @@ contextBridge.exposeInMainWorld('api', {
     setBackground: (projet, chemin) => ipcRenderer.invoke('background:set', projet, chemin),
     getBackground: (projet) => ipcRenderer.invoke('background:get', projet),
 
-    // Citations
-    listCitations: () => ipcRenderer.invoke('citations:list'),
-
     // Config
     saveConfig: (projet, jsonStr) => ipcRenderer.invoke('config:save', projet, jsonStr),
     readConfig: (projet) => ipcRenderer.invoke('config:read', projet),
-    browseFont: () => ipcRenderer.invoke('fonts:browse'),
-    openCitationFile: (theme) => ipcRenderer.invoke('citations:openFile', theme),
-    addCitationFile: () => ipcRenderer.invoke('citations:addFile'),
 
     // Pipeline
     runPipeline: (projet, test) => ipcRenderer.invoke('pipeline:run', projet, test),

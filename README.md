@@ -47,7 +47,7 @@ npm install googleapis
 projets/
 └── deep-focus-01/
     ├── audio/              ← tes pistes Suno (.wav ou .mp3)
-    ├── background.mp4      ← ton loop de 10-20 s
+    ├── background.jpg      ← image fixe (vignette + vidéo)
     └── projet.json         ← titre, tags, durée (facultatif)
 ```
 
@@ -60,7 +60,7 @@ node index.js --projet deep-focus-01
 Tout arrive dans `projets/deep-focus-01/output/` :
 - `deep-focus-01.mp4` — la vidéo
 - `description.txt` — description + chapitres, prêts à coller
-- `miniature.jpg` — image extraite du loop
+- `miniature.jpg` — image extraite du background
 - `recap.json` — trace de l'ordre exact des pistes
 
 ---
@@ -86,7 +86,6 @@ Tout arrive dans `projets/deep-focus-01/output/` :
 | `audio.crossfadeSeconds` | 3 | Durée du fondu entre pistes |
 | `video.targetDurationMinutes` | 180 | Durée visée ; le nombre de passages est calculé seul |
 | `video.upscaleTo4k` | false | Sortie 2160p → traitement VP9/Opus par YouTube |
-| `video.copyVideoStream` | true | Copie du flux vidéo (rapide). `false` = ré-encodage complet |
 | `graine` | nom du projet | Même graine = même ordre de pistes, exactement |
 
 ---
@@ -127,8 +126,8 @@ Le quota d'upload par défaut de l'API est de **6 vidéos par jour environ** (10
 |---|---|
 | Normalisation (1er passage) | ~2 min |
 | Montage playlist | ~4 min |
-| Encodage du loop | ~1 min |
-| Assemblage (copie du flux) | ~3 min |
+| Préparation du background | ~1 min |
+| Assemblage (image fixe + audio) | ~3 min |
 | **Total** | **~10 min** |
 
 Les lancements suivants avec le même audio ou le même loop tombent à 3-4 minutes grâce au cache.

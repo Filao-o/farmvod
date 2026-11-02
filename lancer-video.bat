@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 title Suno Video Compiler
-cd /d "C:\Lucas\YouTube\suno-video-compiler"
+cd /d "%~dp0"
 
 echo ================================================
 echo   PRODUCTION D'UNE VIDEO LONGUE
@@ -16,7 +16,7 @@ if "%PROJET%"=="" goto fin
 
 echo.
 echo Mode de rendu :
-echo   1 = Test rapide (30 secondes, pour valider les visuels)
+echo   1 = Test rapide (30 secondes, pour tester rapidement)
 echo   2 = Production complete (duree cible du projet)
 echo.
 set /p MODE="Choix (1 ou 2) : "

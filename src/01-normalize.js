@@ -78,7 +78,7 @@ async function normaliser(cfg) {
         const sortie = path.join(dossierCache, `${cle}.flac`);
         // Strip du préfixe numérique de tri ("01-Silence" → "Silence").
         // Les fichiers Suno téléchargés en batch sont préfixés pour l'ordre,
-        // mais ce préfixe n'a rien à faire dans le now-playing / les chapitres.
+        // mais ce préfixe n'a rien à faire dans les chapitres.
         const titre = path.parse(fichiers[i]).name.replace(/^\d+[-_\s]+/, '');
 
         if (fs.existsSync(sortie)) {

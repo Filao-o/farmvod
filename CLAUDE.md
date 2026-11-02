@@ -2,12 +2,11 @@
 
 ## Ce que fait ce projet
 
-Pipeline Node.js qui produit des vidéos YouTube longues (1-3h) type "lo-fi study music" à partir de :
+Pipeline Node.js qui produit des vidéos YouTube longues (45 min – 1h20) type "ambient focus music" à partir de :
 - pistes audio générées avec Suno (dans `projets/<nom>/audio/`)
-- pochettes carrées 1024×1024 (dans `projets/<nom>/pochettes/`, même nom que l'audio)
-- fichier de citations (dans `citations/<theme>.txt`)
+- une image fixe `background.jpg` (dans `projets/<nom>/`, sert de vignette ET de vidéo)
 
-Le rendu final est un habillage "now playing" style Apple Music : pochette centrale avec halo, citation en vedette, titre discret, barre de progression par piste, fond flouté hérité de la pochette courante.
+Le rendu final est une image fixe plein écran + audio normalisé avec crossfades.
 
 ## Utilisateur
 
@@ -20,42 +19,29 @@ Le rendu final est un habillage "now playing" style Apple Music : pochette centr
 ## Architecture (pipeline en 5 étapes)
 
 ```
-audio Suno + pochettes + citations
+audio Suno + background.jpg
     ↓ [01-normalize.js]  loudnorm 2 passes → -14 LUFS
     ↓ [02-playlist.js]   fondus enchaînés, ordre remélangé par passage
-    ↓ [03-nowplaying.js] pré-génère les fonds floutés (cache), pioche les citations
-    ↓ [04-assemble.js]   compose via filter_complex FFmpeg + NVENC
+    ↓ [03-background.js] vérifie la présence du background
+    ↓ [04-assemble.js]   image fixe + audio → MP4 (NVENC ou libx264)
     ↓ [05-metadata.js]   description, chapitres, miniature
     ↓ [06-upload.js]     upload YouTube en PRIVÉ (validation humaine obligatoire)
 ```
 
-Le module central est `04-nowplaying-filter.js` qui construit un gros filter_complex FFmpeg.
-
 ## Décisions figées (ne pas remettre en question)
 
 - **Confidentialité upload** : toujours "private", jamais "public" (validation humaine)
-- **Fond dérivé de la pochette** (blur + zoom + saturation), pas de `background.mp4` séparé
-- **Pré-génération des fonds** en cache pour éviter que FFmpeg refasse gblur×N à chaque frame
-- **Codec par défaut** : `nvenc` (NVIDIA), fallback `libx264` dans config si besoin
-- **Barre de progression** : `scale=eval=frame` sur source blanche (drawbox n'évalue qu'une fois → bug connu)
-- **Halo** : blanc pochette-taille + pad transparent (marge ≥ 3×sigma) + `premultiply`/`gblur`/`unpremultiply` + `lut a×1.8`. **Toujours blanc**, jamais teinté par la pochette.
-- **Citation + auteur inline** sur la même ligne, centré
-- **Titre du morceau** petit et discret, sous la citation
+- **Image fixe** : le background.jpg sert de vignette YouTube ET de vidéo entière (pas d'overlay, pas de timeline)
+- **Codec** : `nvenc` (NVIDIA) avec auto-détection, fallback `libx264` sur Mac/sans GPU
+- **Pas d'overlay** : ni barre de progression, ni citations, ni timecode dans la vidéo (retiré pour simplifier)
 - **Aucun visualiseur audio-réactif** (abandonné pour rester simple et rapide)
-- **Pas de vinyle qui tourne** (cliché de la niche, décision volontaire)
 
 ## Réglages actuels du user (config.json / projet.json)
 
 ```json
 {
-  "nowplaying": {
-    "pochette": { "taille_pct_hauteur": 55, "halo_blanc_px": 40, "coins_arrondis_px": 6 },
-    "fond_diffuse": { "flou_px": 80, "zoom": 2.4, "assombrissement_pct": 15, "saturation": 1.1, "respiration": 0.05 },
-    "typographie": {
-      "taille_titre": 15, "taille_sous_titre": 30, "taille_auteur": 18,
-      "auteur_meme_ligne": true, "espace_pochette_texte": 44, "epaisseur_barre_px": 6
-    }
-  }
+  "audio": { "lufs": -14, "crossfadeSeconds": 3, "bitrate": "320k" },
+  "video": { "fps": 30, "crf": 20, "codec": "nvenc", "preset": "ultrafast" }
 }
 ```
 
@@ -83,20 +69,8 @@ ffmpeg -i projets/<nom>/output/<nom>.mp4 -af ebur128 -f null - 2>&1 | tail -6
 
 ## Pièges connus & résolus
 
-- **drawbox n'évalue son expression qu'une fois** → utiliser `scale=eval=frame`
-- **`-loop 1 -i img.jpg` sans `-framerate`** → produit un stream à FPS variable, vidéo tronquée. Toujours mettre `-framerate 30` avant l'input.
-- **Filter_complex trop long en ligne de commande** → passer par `-filter_complex_script <fichier>`
-- **Pilotes NVIDIA < 610.00** → NVENC échoue avec "required nvenc API version"
-- **Apostrophes typographiques dans citations** → drawtext ne les gère pas bien, remplacer `'` par `’`
-- **Chapitres YouTube** : minimum 3, premier à 0:00, min 10s d'espacement, format `MM:SS` sous 1h, `H:MM:SS` au-delà. Sinon YouTube les ignore silencieusement.
-- **`gblur` sur RGBA avec zones transparentes → halo gris, pas blanc**. Le blur mélange le RGB blanc avec le RGB (0,0,0) sous-jacent des pixels transparents. Solution : entourer par `premultiply=inplace=1` avant et `unpremultiply=inplace=1` après le blur. Voir section 2 de `04-nowplaying-filter.js`.
-- **`gblur` coupé net au bord du canvas** → marge du pad doit être ≥ 3 × sigma, sinon on voit une ligne visible là où le blur s'arrête.
-
-## Prototypes visuels (dans `outputs/` du chat, pas dans le repo)
-
-- `prototype-now-playing.html` — outil de design du look (charge une pochette + un MP3, ajuste les curseurs)
-- `prototype-visualiseur.html` — ancien prototype visualiseur (à ignorer maintenant)
-- `deep-focus.txt` — 82 citations Deep Focus vérifiées (Newport, Clear, Naval, Holiday, stoïciens…)
+- **`-loop 1 -i img.jpg` sans `-framerate`** → produit un stream à FPS variable, vidéo tronquée. Toujours mettre `-framerate 30` avant l’input.
+- **Chapitres YouTube** : minimum 3, premier à 0:00, min 10s d’espacement, format `MM:SS` sous 1h, `H:MM:SS` au-delà. Sinon YouTube les ignore silencieusement.
 
 ## Structure fichiers projet
 
@@ -104,33 +78,67 @@ ffmpeg -i projets/<nom>/output/<nom>.mp4 -af ebur128 -f null - 2>&1 | tail -6
 suno-video-compiler/
 ├── index.js
 ├── config.json           # réglages globaux (surchargés par projet.json)
-├── lancer-video.bat      # menu interactif pour non-devs
+├── lancer-video.bat      # menu interactif Windows
+├── demarrer-app.bat      # lanceur Electron Windows
+├── demarrer-app.command  # lanceur Electron macOS
 ├── src/
 │   ├── config.js
 │   ├── utils.js
 │   ├── 01-normalize.js
 │   ├── 02-playlist.js
-│   ├── 03-nowplaying.js
+│   ├── 03-background.js
 │   ├── 04-assemble.js
-│   ├── 04-nowplaying-filter.js
 │   ├── 05-metadata.js
 │   └── 06-upload.js
-├── citations/
-│   └── deep-focus.txt    # 82 citations, format "citation|auteur"
 ├── projets/
 │   └── <nom>/
 │       ├── audio/        # .wav ou .mp3
-│       ├── pochettes/    # .jpg carrée, même nom que l'audio
+│       ├── background.jpg # image fixe = vignette + vidéo
 │       ├── projet.json   # overrides pour ce projet
-│       └── output/       # vidéo générée + description + miniature + filter.txt
-└── .cache/               # fonds pré-générés, normalisations
+│       └── output/       # vidéo générée + description + miniature
+└── .cache/               # normalisations
 ```
 
 ## Prochaines étapes envisagées
 
-- **Interface Electron** (après stabilisation) : centraliser le workflow, pas la cosmétique. Objectifs : drop d'audio + pochette auto-redimensionnée et auto-renommée, édition inline des titres/timing, sélection de la durée cible, cases à cocher pour les options. But = zéro fouille dans les fichiers.
-- ~~Génération pochettes via API~~ : abandonné, images libres de droit suffisent pour la 1ère chaîne.
-- ~~Teinte halo dynamique~~ : abandonné, halo blanc figé.
+- **Interface Electron** (après stabilisation) : centraliser le workflow. Objectifs : drop d'audio + background, édition inline des titres/timing, sélection de la durée cible, cases à cocher pour les options.
+
+## Branding — LucidityFM
+
+### Channel identity
+- **Name**: LucidityFM
+- **Niche**: Ambient music for deep work — not bland or tasteless, designed to accompany the brain
+- **Format**: 45 min to 1h20 sessions, 2 videos/week
+- **Music source**: Keep vague (AI-generated via Suno, but never stated publicly)
+
+### Audience
+- Entrepreneurs, developers, programmers, remote workers, freelancers
+- **Pain points to hit**: procrastination, attention loss, lack of focus, loneliness of solo work
+- People who know they should be working but keep scrolling instead
+
+### Tone & voice
+- **Direct, confrontational, like a coach who talks tough because it works**
+- Not motivational-poster fluff — raw, slightly abrasive, honest
+- Speaks TO the viewer, not AT them ("You keep telling yourself you'll start in 5 minutes. You won't.")
+- Underlying message: I'm pushing you because I know you can do it
+
+### Style rules for titles, descriptions, thumbnails
+- English only
+- Short, punchy titles — hit a nerve, not a keyword
+- Minimalist thumbnails — no clutter, no clickbait faces
+- No begging for likes/subs — the work speaks for itself
+- Descriptions: focus, discipline, solitude, deep work themes
+
+### Channel description
+> Your brain wasn't built for notifications. It was built for this.
+>
+> Long-form ambient music designed to shut the noise out and let the work in. No lyrics. No distractions. Just sound that gets out of your way while your brain does what it's supposed to do.
+>
+> You keep telling yourself you'll "start in 5 minutes." You won't. You'll scroll, you'll snack, you'll reorganize your desktop for the third time today. Meanwhile the deadline hasn't moved and neither have you.
+>
+> Hit play. Lock in. That's it.
+>
+> New sessions drop twice a week — 45 min to 1h+ of uninterrupted focus fuel for the ones who actually want to get something done today.
 
 ## Style de collaboration attendu
 
