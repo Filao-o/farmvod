@@ -526,15 +526,11 @@ function setPath(obj, dotPath, value) {
     cur[keys[keys.length - 1]] = value;
 }
 
-function setVal(sel, val, type) {
+function setVal(sel, val) {
     if (val == null) return;
     const el = $(sel);
     if (!el) return;
-    if (type === 'color') {
-        el.value = nameToHex(val);
-    } else {
-        el.value = val;
-    }
+    el.value = val;
 }
 
 function int(sel) { return parseInt($(sel).value) || 0; }
