@@ -1,0 +1,55 @@
+{
+  "_commentaire": "Presets de génération musicale Suno pour LucidityFM. 100% instrumental, jamais de voix (les voix cassent le focus). Chaque preset = un type d'ambiance deep work.",
+  "_modele_defaut": "v6",
+  "presets": {
+    "deep-focus-piano": {
+      "nom": "Deep Focus Piano",
+      "style": "ambient piano, soft warm pads, minimal, sparse, no drums",
+      "bpm": "60-70",
+      "instrumental": true,
+      "ambiance": "calme, introspectif — travail de fond, lecture, écriture"
+    },
+    "lofi-night-code": {
+      "nom": "Lo-fi Night Code",
+      "style": "lofi hip hop, mellow, warm vinyl, soft beat, nocturnal",
+      "bpm": "75-85",
+      "instrumental": true,
+      "ambiance": "cocon nocturne — coder tard, le pilier de la niche"
+    },
+    "ambient-rain-drone": {
+      "nom": "Ambient Rain / Drone",
+      "style": "ambient drone, atmospheric pads, gentle rain, no percussion, evolving",
+      "bpm": "libre",
+      "instrumental": true,
+      "ambiance": "immersif, enveloppant — hyper-concentration, deadline"
+    },
+    "synthwave-focus": {
+      "nom": "Synthwave Focus",
+      "style": "chillwave, warm analog synth, slow arpeggio, dreamy, retro",
+      "bpm": "90-100",
+      "instrumental": true,
+      "ambiance": "momentum rétro-futuriste — garder de l'élan sans distraire"
+    },
+    "organic-nature-flow": {
+      "nom": "Organic / Nature Flow",
+      "style": "organic ambient, nylon guitar, kalimba, soft field recording, warm",
+      "bpm": "70",
+      "instrumental": true,
+      "ambiance": "chaleureux, lumineux, humain"
+    },
+    "dark-focus-cinematic": {
+      "nom": "Dark Focus / Cinematic",
+      "style": "dark ambient, cinematic pads, deep sub bass, slow, tense, brooding",
+      "bpm": "lent",
+      "instrumental": true,
+      "ambiance": "intense, sérieux — mode lock in, guerrier"
+    },
+    "minimal-techno-engine": {
+      "nom": "Minimal Techno (work engine)",
+      "style": "minimal techno, hypnotic, steady pulse, repetitive, deep, no vocals",
+      "bpm": "120",
+      "instrumental": true,
+      "ambiance": "énergie soutenue — abattre du volume de tâches mécaniques"
+    }
+  }
+}
