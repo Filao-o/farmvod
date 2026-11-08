@@ -8,6 +8,13 @@ Pipeline Node.js qui produit des vidéos YouTube longues (45 min – 1h20) type 
 
 Le rendu final est une image fixe plein écran + audio normalisé avec crossfades.
 
+**Nouveau (nov. 2026) : le MCP Suno est connecté.** La musique peut maintenant être
+générée directement via l'outil, sans passer par le site. Répartition des rôles :
+- **Claude (cerveau)** : génère la musique (MCP Suno), écrit le SEO (titres, descriptions,
+  chapitres), prépare les assets (miniatures).
+- **PC du user (muscle)** : encode la vidéo (NVENC) et pousse sur YouTube via l'API.
+  La vidéo fait 1-3 Go et vit sur le disque du user — ce n'est pas Claude qui la transporte.
+
 ## Utilisateur
 
 - **Windows** avec RTX 3080 (encodage GPU via NVENC)
@@ -35,6 +42,11 @@ audio Suno + background.jpg
 - **Codec** : `nvenc` (NVIDIA) avec auto-détection, fallback `libx264` sur Mac/sans GPU
 - **Pas d'overlay** : ni barre de progression, ni citations, ni timecode dans la vidéo (retiré pour simplifier)
 - **Aucun visualiseur audio-réactif** (abandonné pour rester simple et rapide)
+- **Musique 100 % instrumentale, JAMAIS de voix** — les voix cassent le focus. Non négociable.
+- **Encodage en local, pas dans le cloud** : le RTX 3080 encode en ~3 min gratuitement.
+  L'encodage cloud « gratuit » (type Vercel) a été étudié puis rejeté : serverless limité à
+  10-60 s, pas de GPU, et 1-3 Go à transférer. Un site web = au mieux un tableau de bord qui
+  orchestre, jamais l'encodeur. Archi web + agent local possible mais prématurée pour une chaîne solo.
 
 ## Réglages actuels du user (config.json / projet.json)
 
@@ -44,6 +56,29 @@ audio Suno + background.jpg
   "video": { "fps": 30, "crf": 20, "codec": "nvenc", "preset": "ultrafast" }
 }
 ```
+
+## Génération musicale (MCP Suno)
+
+Compte Suno : **Pro Plan**, 2500 crédits/mois, modèles `v6-mini` / `v6` / `v6-wild`.
+Via le MCP, **chaque appel de génération sort 2 morceaux et débite des crédits** → toujours
+confirmer avant de lancer un batch. L'**analyse** audio (BPM, tonalité, sections) est **gratuite**.
+
+**Identité sonore retenue** (après tests d'écoute) : électronique, synthé, sombre, avec du
+mouvement — univers « night coding / lock-in ». Les 3 presets partagent la palette et
+s'enchaînent dans une même session d'1-2h. Les styles doux (piano, lo-fi, ambient pluie,
+organic) ont été testés puis **écartés** (trop lents, trop « wallpaper IA »).
+
+Les presets vivent dans **`presets/musique.json`** (3 gardés) :
+- `synthwave-focus` — synthés analogiques chauds, arpège lent, ~90-100 BPM
+- `dark-focus-cinematic` — dark ambient, pads cinématiques, sub profond, lent
+- `minimal-techno-engine` — techno minimale hypnotique, ~120 BPM
+
+Levier anti-« IA » validé : pistes plus longues (240 s) + `controls.variety` à 2.
+
+**Outil `outils/decouper-compilation.js`** : découpe une compilation (fichier local chez le user)
+en ses pistes uniques d'après un chapitrage YouTube, déduplique les titres répétés, ignore les
+lignes-marqueurs (ex : `🔃`). Sert à extraire des échantillons de référence pour analyser la
+cible sonore (analyse uniquement — on ne republie pas de morceaux protégés).
 
 ## Commandes utiles
 
@@ -71,6 +106,7 @@ ffmpeg -i projets/<nom>/output/<nom>.mp4 -af ebur128 -f null - 2>&1 | tail -6
 
 - **`-loop 1 -i img.jpg` sans `-framerate`** → produit un stream à FPS variable, vidéo tronquée. Toujours mettre `-framerate 30` avant l’input.
 - **Chapitres YouTube** : minimum 3, premier à 0:00, min 10s d’espacement, format `MM:SS` sous 1h, `H:MM:SS` au-delà. Sinon YouTube les ignore silencieusement.
+- **FFmpeg 9+ / NVENC** : l'option s'écrit `-spatial-aq` (plus `-spatial_aq`, renommé). La détection NVENC se fait par probe réelle d'encodage (256×256 min, sinon « Frame Dimension less than the minimum supported value »), pas par lecture de `-encoders`. Corrigé et mergé dans `main`.
 
 ## Structure fichiers projet
 
@@ -81,6 +117,10 @@ suno-video-compiler/
 ├── lancer-video.bat      # menu interactif Windows
 ├── demarrer-app.bat      # lanceur Electron Windows
 ├── demarrer-app.command  # lanceur Electron macOS
+├── presets/
+│   └── musique.json      # presets de génération Suno (3 gardés, instrumental only)
+├── outils/
+│   └── decouper-compilation.js  # découpe une compil en pistes uniques (référence)
 ├── src/
 │   ├── config.js
 │   ├── utils.js
@@ -101,7 +141,19 @@ suno-video-compiler/
 
 ## Prochaines étapes envisagées
 
-- **Interface Electron** (après stabilisation) : centraliser le workflow. Objectifs : drop d'audio + background, édition inline des titres/timing, sélection de la durée cible, cases à cocher pour les options.
+Roadmap d'automatisation (dans l'ordre) :
+1. **Analyse des références** : le user extrait des échantillons d'une compilation concurrente
+   (`outils/decouper-compilation.js`) et les envoie ; Claude analyse (BPM, tonalité, instruments)
+   et fige les tags définitifs des 3 presets. *← étape en cours au moment du passage en local.*
+2. **Batch session complète** : générer ~9-12 pistes (3 par style, 240 s, variety 2) pour monter
+   une vraie session d'1h30, puis la passer dans le pipeline (normalize → playlist → assemble).
+3. **Miniatures automatisées** : template fixe (fond, 3 objets centrés + titre). Pas de MCP Canva
+   dispo → soit générateur programmatique Node (`sharp`), soit Figma (connecté). **Garde-fou
+   juridique** : pas de personnage/marque protégés sur des miniatures monétisées (ex : Harvey
+   Specter/Suits, logo Red Bull) → utiliser des visuels libres/génériques au même code visuel.
+4. **Titres cliffhanger** dans la voix LucidityFM, branchés sur `05-metadata.js`.
+5. **Plus tard** : connecter le PC du user à Claude (Remote Control, Early Access) pour lancer le
+   pipeline de bout en bout sans copier-coller ; interface Electron pour centraliser le workflow.
 
 ## Branding — LucidityFM
 
