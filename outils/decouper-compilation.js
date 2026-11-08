@@ -76,6 +76,9 @@ function main() {
 
     for (let i = 0; i < chap.length; i++) {
         const { debut, titre } = chap[i];
+        // Ligne-marqueur sans texte réel (ex: "🔃" de boucle) : pas une piste,
+        // sert seulement de borne de fin pour la piste précédente.
+        if (!/[\p{L}\p{N}]/u.test(titre)) continue;
         const cle = slug(titre);
         if (vus.has(cle)) continue;          // doublon → on saute
         vus.add(cle);
