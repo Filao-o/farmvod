@@ -11,16 +11,24 @@
     "gopSeconds": 2,
     "crf": 20,
     "preset": "fast",
-    "codec": "nvenc",
+    "codec": "auto",
     "upscaleTo4k": false
   },
   "metadata": {
-    "tags": ["lofi", "study music", "deep focus", "relaxing music", "concentration"],
+    "tags": [
+      "lofi",
+      "study music",
+      "deep focus",
+      "relaxing music",
+      "concentration"
+    ],
     "chapitresPremierPassageSeulement": true
   },
   "upload": {
     "actif": false,
     "categorieId": "10",
-    "playlistId": ""
-  }
+    "playlistId": "",
+    "oauthPort": 4567
+  },
+  "chaineDefaut": "exemple"
 }

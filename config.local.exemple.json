@@ -1,0 +1,11 @@
+{
+  "_comment": "Copie ce fichier en config.local.json (ignore par git) pour tes reglages personnels. Il surcharge config.json ; n'y mets que ce que tu changes.",
+  "chaineDefaut": "ma-chaine",
+  "video": {
+    "codec": "auto"
+  },
+  "upload": {
+    "playlistId": "",
+    "oauthPort": 4567
+  }
+}

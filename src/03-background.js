@@ -21,7 +21,7 @@ async function preparerBackground(cfg) {
     if (!background) {
         throw new Error(
             `Image background manquante dans ${cfg.dossierProjet}\n` +
-            `   Dépose un fichier background.jpg (ou .png) — ta vignette YouTube.`
+            `   Dépose un fichier background.jpg (ou .png, .webp) : c'est le fond de la vidéo et sa miniature.`
         );
     }
     log.ok(`Background : ${path.basename(background)}`);

@@ -53,15 +53,24 @@ function construireChapitres(tracklist, cfg, nbPistesUniques) {
 
 async function extraireMiniature(cfg, fond) {
     const sortie = path.join(cfg.dossierSortie, 'miniature.jpg');
+    // Une miniature déjà présente n'est JAMAIS écrasée : c'est peut-être la
+    // tienne (montée à part), déposée là pour partir avec l'upload.
+    if (fs.existsSync(sortie)) {
+        log.info('Miniature existante conservée : miniature.jpg (supprime-la pour la régénérer depuis le background)');
+        return sortie;
+    }
     try {
+        // Pas de "-ss" : le background est une image fixe (une seule frame),
+        // un décalage d'une seconde ne produisait aucun fichier, sans erreur.
         await ffmpeg([
-            '-y', '-ss', '1', '-i', fond.fichier,
+            '-y', '-i', fond.fichier,
             '-frames:v', '1',
-            '-vf', 'scale=1280:720:flags=lanczos',
+            '-vf', 'scale=1280:720:force_original_aspect_ratio=increase:flags=lanczos,crop=1280:720',
             '-q:v', '2',
             sortie,
         ]);
-        log.info('Miniature extraite : miniature.jpg (1280×720, à retoucher si besoin)');
+        if (!fs.existsSync(sortie)) throw new Error('ffmpeg n\'a produit aucun fichier');
+        log.info('Miniature extraite : miniature.jpg (1280×720, depuis le background)');
         return sortie;
     } catch (e) {
         log.warn(`Miniature non générée : ${e.message.split('\n')[0]}`);

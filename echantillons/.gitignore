@@ -1,0 +1,6 @@
+# Ce dossier sert à analyser des compilations de tiers : médias, pistes
+# découpées, chapitrages et notes d'analyse restent HORS du dépôt.
+# Seuls ce fichier et le README sont versionnés.
+*
+!.gitignore
+!README.md

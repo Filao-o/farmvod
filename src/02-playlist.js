@@ -44,6 +44,31 @@ async function fondreEnchaine(fichiers, sortie, secondes, etiquette, dureeEstime
     process.stdout.write('\n');
 }
 
+// Construit la tracklist horodatée à partir de l'ordre complet des passages.
+// Chaque jonction recouvre d secondes : le décalage cumulé est donc de
+// index × d au index-ième morceau. On ignore les morceaux qui commenceraient
+// au-delà de la fin réelle de la vidéo.
+function construireTracklist(ordre, d, dureeFinale) {
+    const plat = ordre.flat();
+    const nbUniques = ordre[0] ? ordre[0].length : plat.length;
+    const tracklist = [];
+    let curseur = 0;
+    plat.forEach((piste, index) => {
+        const debut = curseur - index * d;
+        if (debut < dureeFinale) {
+            tracklist.push({
+                index,
+                titre: piste.titre,
+                debut: Math.max(0, debut),
+                horodatage: horodatageYoutube(Math.max(0, debut)),
+                passage: Math.floor(index / nbUniques) + 1,
+            });
+        }
+        curseur += piste.duree;
+    });
+    return tracklist;
+}
+
 async function monterPlaylist(cfg, pistes) {
     log.step('Étape 2/5 — Montage de la playlist longue (fondus enchaînés)');
 
@@ -90,6 +115,17 @@ async function monterPlaylist(cfg, pistes) {
         ordre.push(bloc);
     }
 
+    // --- Mode méta seule : aucun ré-assemblage audio -------------------
+    // On ne reconstruit ni les blocs ni le master : on réutilise la durée
+    // de la vidéo déjà rendue et on recalcule uniquement la tracklist
+    // (horodatages + libellés). Zéro appel ffmpeg, donc zéro ré-encodage.
+    if (cfg._metaOnly) {
+        const dureeFinale = cfg._dureeExistante || cible;
+        const tracklist = construireTracklist(ordre, d, dureeFinale);
+        log.ok(`Métadonnées seules : tracklist recalculée (${tracklist.length} morceaux, sans ré-encodage)`);
+        return { master: null, duree: dureeFinale, tracklist };
+    }
+
     // --- Montage hiérarchique ------------------------------------------
     // On fond d'abord chaque passage séparément, puis les passages entre
     // eux. Sans ça, un projet de 3 h ouvrirait 50+ entrées simultanées
@@ -119,23 +155,7 @@ async function monterPlaylist(cfg, pistes) {
     const dureeFinale = Math.min(dureeReelle, cible + dureeParPassage); // on ne coupe jamais en plein milieu d'un passage
 
     // --- Tracklist avec horodatage exact --------------------------------
-    // Chaque jonction recouvre d secondes : le décalage cumulé est donc
-    // de i × d au i-ème morceau.
-    const tracklist = [];
-    let curseur = 0;
-    ordre.flat().forEach((piste, index) => {
-        const debut = curseur - index * d;
-        if (debut < dureeFinale) {
-            tracklist.push({
-                index,
-                titre: piste.titre,
-                debut: Math.max(0, debut),
-                horodatage: horodatageYoutube(Math.max(0, debut)),
-                passage: Math.floor(index / pistes.length) + 1,
-            });
-        }
-        curseur += piste.duree;
-    });
+    const tracklist = construireTracklist(ordre, d, dureeFinale);
 
     log.ok(`Master audio : ${hms(dureeReelle)} — ${tracklist.length} morceaux enchaînés`);
     return { master, duree: dureeReelle, tracklist };

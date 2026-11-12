@@ -1,0 +1,49 @@
+{
+  "niche": "exemple-focus",
+  "chaines": [
+    "exemple"
+  ],
+  "brief": "Niche d'EXEMPLE, neutre, a copier pour creer la tienne. Ce qu'on publie : mixes instrumentaux calmes pour etudier, lire, travailler. Audience : etudiants et personnes qui travaillent sur ecran. Ton (titres) : simple, descriptif, en anglais. Ton (chapitres) : noms courts Title Case 2-3 mots, valides comme nom de fichier.",
+  "titres": [
+    { "id": "t001", "texte": "calm instrumental music for deep focus" },
+    { "id": "t002", "texte": "one quiet hour to get your work done" },
+    { "id": "t003", "texte": "study session — soft background music" },
+    { "id": "t004", "texte": "steady music for reading and writing" },
+    { "id": "t005", "texte": "a slow morning at your desk" },
+    { "id": "t006", "texte": "late evening focus mix" },
+    { "id": "t007", "texte": "background music for long tasks" },
+    { "id": "t008", "texte": "quiet room, clear mind" }
+  ],
+  "setsChapitres": [
+    {
+      "id": "morning",
+      "theme": "morning",
+      "chapitres": [
+        "First Light", "Open Window", "Warm Cup", "Clean Desk",
+        "Slow Start", "Soft Steps", "Blank Page", "Steady Pace",
+        "Long Breath", "Clear Sky", "Quiet Street", "Midday Sun"
+      ]
+    },
+    {
+      "id": "evening",
+      "theme": "evening",
+      "chapitres": [
+        "Blue Hour", "Slow Tide", "Desk Lamp", "Quiet Room",
+        "Empty Hall", "Low Light", "Night Train", "Still Water",
+        "Far Lights", "Closing Time", "Last Page", "Lights Out"
+      ]
+    }
+  ],
+  "keywords": [
+    { "id": "k001", "texte": "focus music" },
+    { "id": "k002", "texte": "study music" },
+    { "id": "k003", "texte": "deep focus" },
+    { "id": "k004", "texte": "instrumental music" },
+    { "id": "k005", "texte": "background music" },
+    { "id": "k006", "texte": "concentration music" },
+    { "id": "k007", "texte": "work music" },
+    { "id": "k008", "texte": "reading music" },
+    { "id": "k009", "texte": "calm music" },
+    { "id": "k010", "texte": "no vocals" }
+  ]
+}

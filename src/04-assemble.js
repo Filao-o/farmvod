@@ -4,19 +4,25 @@ const fs = require('fs');
 const path = require('path');
 const { ffmpeg, log, ensureDir, hms, bytesToMo, progressReporter, duration } = require('./utils');
 
+// 'auto' (défaut) et 'nvenc' : on tente un vrai encodage NVENC minuscule ; s'il
+// échoue (pas de carte NVIDIA, pilote trop ancien, ffmpeg compilé sans NVENC),
+// on encode sur le processeur avec libx264. Tout autre valeur = libx264.
 async function verifierCodec(codec) {
-    if (codec !== 'nvenc' && codec !== 'h264_nvenc') return codec;
-    const { execSync } = require('child_process');
+    if (codec !== 'auto' && codec !== 'nvenc' && codec !== 'h264_nvenc') return 'libx264';
+    const { execFileSync } = require('child_process');
     const os = require('os');
     const tmp = path.join(os.tmpdir(), `nvenc-probe-${process.pid}.mp4`);
     try {
-        execSync(
-            `ffmpeg -hide_banner -y -f lavfi -i color=black:s=256x256:d=0.04 -frames:v 1 -c:v h264_nvenc "${tmp}"`,
-            { stdio: 'pipe', timeout: 10000 },
+        execFileSync(
+            'ffmpeg',
+            ['-hide_banner', '-y', '-f', 'lavfi', '-i', 'color=black:s=256x256:d=0.04',
+                '-frames:v', '1', '-c:v', 'h264_nvenc', tmp],
+            { stdio: 'pipe', timeout: 20000, windowsHide: true },
         );
-        return codec;
+        log.info('Encodeur : NVENC (carte graphique NVIDIA).');
+        return 'nvenc';
     } catch {
-        log.warn('NVENC non disponible — fallback automatique vers libx264 (encodage CPU).');
+        log.warn('Aucun encodeur GPU NVIDIA (NVENC) utilisable — encodage sur le processeur (libx264). Normal sans carte NVIDIA, juste plus lent.');
         return 'libx264';
     } finally {
         try { fs.unlinkSync(tmp); } catch {}
@@ -50,7 +56,7 @@ function paramsCodec(codec, cfg) {
 async function assembler(cfg, audio, visuel) {
     log.step('Étape 4/5 — Assemblage final (image fixe + audio)');
 
-    const codec = await verifierCodec((cfg.video.codec || 'libx264').toLowerCase());
+    const codec = await verifierCodec(String(cfg.video.codec || 'auto').toLowerCase());
 
     ensureDir(cfg.dossierSortie);
     const sortie = path.join(cfg.dossierSortie, `${cfg.nom}.mp4`);

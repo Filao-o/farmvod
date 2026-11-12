@@ -1,12 +1,17 @@
 {
-  "graine": "deep-focus-01",
+  "niche": "exemple-focus",
+  "chaine": "exemple",
+  "graine": "exemple-deep-focus",
   "video": {
-    "targetDurationMinutes": 180
+    "targetDurationMinutes": 3
   },
   "metadata": {
-    "titre": "Deep Focus — 3 Hours of Lofi Study Music",
-    "intro": "Trois heures de musique lo-fi pour travailler, réviser ou coder sans distraction.",
-    "outro": "Musique originale générée avec Suno.\nAbonne-toi pour ne rien manquer.",
-    "tags": ["lofi", "study music", "deep focus", "3 hours", "concentration"]
+    "titre": "Deep Focus — Demo Session",
+    "langue": "en",
+    "descriptionTemplate": "{intro}\n\nTracklist:\n{chapitres}\n\n{outro}",
+    "intro": "Demo project: four short synthetic tones stitched into one video, to check that the whole pipeline runs on your machine.\nReplace the files in audio/ and background.jpg with your own to make a real video.",
+    "outro": "#focusmusic #studymusic",
+    "tags": ["focus music", "study music", "deep focus", "concentration", "background music"],
+    "chapitres": ["First Light", "Slow Tide", "Quiet Room", "Last Page"]
   }
 }

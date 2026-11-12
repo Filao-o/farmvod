@@ -41,8 +41,10 @@ function run(bin, args, { onStderr } = {}) {
         proc.on('error', (e) => {
             if (e.code === 'ENOENT') {
                 reject(new Error(
-                    `Binaire "${bin}" introuvable. Vérifie que FFmpeg est installé ` +
-                    `et présent dans le PATH Windows (teste : ffmpeg -version).`
+                    `"${bin}" est introuvable : FFmpeg n'est pas installé, ou pas dans le PATH.\n` +
+                    `   Windows : ouvre PowerShell et lance   winget install Gyan.FFmpeg\n` +
+                    `   puis FERME et ROUVRE le terminal, et vérifie avec   ffmpeg -version\n` +
+                    `   (autres systèmes : https://ffmpeg.org/download.html)`
                 ));
             } else {
                 reject(e);

@@ -1,0 +1,17 @@
+{
+  "_comment": "Template de CHAINE d'exemple (neutre). Copie ce fichier en presets/chaines/<ta-chaine>.json et adapte-le : c'est le contenu statique commun a toutes tes videos. Un projet neuf en herite (outils/composer-projet.js --nouveau --chaine <ta-chaine>), puis la pioche dans la niche remplit titre/chapitres/tags. Ne mets PAS ici titre/chapitres/tags (dynamiques) ni fps/crf/codec (config.json). 'playlistId' : l'ID de TA playlist YouTube (la partie apres 'list=' dans son URL), ou vide.",
+  "niche": "exemple-focus",
+  "chaine": "exemple",
+  "video": {
+    "targetDurationMinutes": 60
+  },
+  "metadata": {
+    "langue": "en",
+    "descriptionTemplate": "{intro}\n\nTracklist:\n{chapitres}\n\n{outro}",
+    "intro": "One hour of calm instrumental music for studying, reading and focused work.\n\nNo vocals, no sudden changes — just a steady background to help you stay on task.",
+    "outro": "#focusmusic #studymusic #deepfocus #instrumental"
+  },
+  "upload": {
+    "playlistId": ""
+  }
+}

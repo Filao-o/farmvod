@@ -1,110 +1,106 @@
 # installer-windows.ps1
-# Script d'installation des dependances pour Suno Video Compiler
-# Lancer dans PowerShell en admin : Set-ExecutionPolicy Bypass -Scope Process; .\installer-windows.ps1
+# Installe les prerequis (Node.js LTS, FFmpeg) puis les dependances npm du projet,
+# DANS LE DOSSIER OU SE TROUVE CE SCRIPT (aucun chemin en dur, aucun clonage).
+#
+# Usage : clic droit sur le fichier > "Executer avec PowerShell", ou dans PowerShell :
+#   Set-ExecutionPolicy Bypass -Scope Process; .\installer-windows.ps1
 
 $ErrorActionPreference = "Stop"
+$projetDir = $PSScriptRoot
 
 Write-Host "`n================================================" -ForegroundColor Cyan
 Write-Host "  Suno Video Compiler - Installation Windows" -ForegroundColor Cyan
 Write-Host "================================================`n" -ForegroundColor Cyan
+Write-Host "  Dossier du projet : $projetDir`n"
 
-# --- 1. Verifier / installer winget ---
+# Recharge le PATH (machine + utilisateur) pour voir ce que winget vient d'installer
+# sans avoir a rouvrir le terminal.
+function Update-SessionPath {
+    $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $user = [Environment]::GetEnvironmentVariable("Path", "User")
+    $env:PATH = "$machine;$user"
+}
+
+# --- 1. winget ---
 $hasWinget = Get-Command winget -ErrorAction SilentlyContinue
 if (-not $hasWinget) {
-    Write-Host "[!] winget non trouve. Installe App Installer depuis le Microsoft Store." -ForegroundColor Red
+    Write-Host "[!] winget non trouve. Installe 'App Installer' depuis le Microsoft Store :" -ForegroundColor Red
     Write-Host "    https://aka.ms/getwinget" -ForegroundColor Yellow
+    Write-Host "    Ou installe a la main Node.js (https://nodejs.org) et FFmpeg (https://ffmpeg.org)," -ForegroundColor Yellow
+    Write-Host "    puis lance 'npm install' dans le dossier du projet." -ForegroundColor Yellow
     exit 1
 }
 Write-Host "[OK] winget disponible" -ForegroundColor Green
 
-# --- 2. Git ---
-$hasGit = Get-Command git -ErrorAction SilentlyContinue
-if (-not $hasGit) {
-    Write-Host "[>>] Installation de Git..." -ForegroundColor Yellow
-    winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements
-    $env:PATH = "$env:PATH;C:\Program Files\Git\cmd"
-} else {
-    Write-Host "[OK] Git deja installe : $(git --version)" -ForegroundColor Green
-}
-
-# --- 3. Node.js ---
-$hasNode = Get-Command node -ErrorAction SilentlyContinue
-if (-not $hasNode) {
-    Write-Host "[>>] Installation de Node.js LTS..." -ForegroundColor Yellow
-    winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-source-agreements
-    $env:PATH = "$env:PATH;C:\Program Files\nodejs"
-} else {
+# --- 2. Node.js (>= 18) ---
+$besoinNode = $true
+if (Get-Command node -ErrorAction SilentlyContinue) {
     $nodeVersion = node --version
-    Write-Host "[OK] Node.js deja installe : $nodeVersion" -ForegroundColor Green
     $major = [int]($nodeVersion -replace 'v(\d+)\..*', '$1')
-    if ($major -lt 18) {
+    if ($major -ge 18) {
+        Write-Host "[OK] Node.js deja installe : $nodeVersion" -ForegroundColor Green
+        $besoinNode = $false
+    } else {
         Write-Host "[!] Node.js >= 18 requis (tu as $nodeVersion). Mise a jour..." -ForegroundColor Yellow
-        winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-source-agreements
     }
 }
+if ($besoinNode) {
+    Write-Host "[>>] Installation de Node.js LTS..." -ForegroundColor Yellow
+    winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-source-agreements
+    Update-SessionPath
+}
 
-# --- 4. FFmpeg ---
-$hasFFmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
-if (-not $hasFFmpeg) {
+# --- 3. FFmpeg (ffmpeg + ffprobe) ---
+if (Get-Command ffmpeg -ErrorAction SilentlyContinue) {
+    Write-Host "[OK] FFmpeg deja installe" -ForegroundColor Green
+} else {
     Write-Host "[>>] Installation de FFmpeg..." -ForegroundColor Yellow
     winget install --id Gyan.FFmpeg -e --accept-package-agreements --accept-source-agreements
-    Write-Host "[!] Redemarrer le terminal apres install pour que ffmpeg soit dans le PATH." -ForegroundColor Yellow
-} else {
-    Write-Host "[OK] FFmpeg deja installe" -ForegroundColor Green
-    ffmpeg -version 2>&1 | Select-Object -First 1
+    Update-SessionPath
 }
 
-# --- 5. Cloner / mettre a jour le repo ---
-$projetDir = "$env:USERPROFILE\Desktop\suno-video-compiler"
-
-if (Test-Path "$projetDir\.git") {
-    Write-Host "`n[>>] Mise a jour du repo sur le Bureau..." -ForegroundColor Yellow
+# --- 4. npm install (dans le dossier du script) ---
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Host "`n[>>] Installation des packages npm..." -ForegroundColor Yellow
     Push-Location $projetDir
-    git pull origin main
-    Pop-Location
+    try { npm install } finally { Pop-Location }
 } else {
-    Write-Host "`n[>>] Clonage du repo sur le Bureau..." -ForegroundColor Yellow
-    git clone https://github.com/filao-o/farmvod.git $projetDir
+    Write-Host "`n[!] npm introuvable dans ce terminal. Ferme-le, rouvres-en un," -ForegroundColor Yellow
+    Write-Host "    puis lance 'npm install' dans : $projetDir" -ForegroundColor Yellow
 }
 
-# --- 6. npm install ---
-Write-Host "`n[>>] Installation des packages npm..." -ForegroundColor Yellow
-Push-Location $projetDir
-npm install
-Pop-Location
-
-# --- 7. Verifications finales ---
+# --- 5. Verifications finales ---
 Write-Host "`n================================================" -ForegroundColor Green
 Write-Host "  Verification finale" -ForegroundColor Green
 Write-Host "================================================`n" -ForegroundColor Green
 
 $checks = @(
-    @{ Name = "Git";     Cmd = "git --version" },
-    @{ Name = "Node.js"; Cmd = "node --version" },
-    @{ Name = "npm";     Cmd = "npm --version" },
-    @{ Name = "FFmpeg";  Cmd = "ffmpeg -version" },
-    @{ Name = "FFprobe"; Cmd = "ffprobe -version" }
+    @{ Name = "Node.js"; Exe = "node";    Args = @("--version") },
+    @{ Name = "npm";     Exe = "npm";     Args = @("--version") },
+    @{ Name = "FFmpeg";  Exe = "ffmpeg";  Args = @("-version") },
+    @{ Name = "FFprobe"; Exe = "ffprobe"; Args = @("-version") }
 )
 
+$manquants = 0
 foreach ($c in $checks) {
-    try {
-        $out = Invoke-Expression $c.Cmd 2>&1 | Select-Object -First 1
+    if (Get-Command $c.Exe -ErrorAction SilentlyContinue) {
+        $out = & $c.Exe @($c.Args) 2>$null | Select-Object -First 1
         Write-Host "  [OK] $($c.Name) : $out" -ForegroundColor Green
-    } catch {
-        Write-Host "  [!!] $($c.Name) : NON TROUVE - relancer le terminal ou installer manuellement" -ForegroundColor Red
+    } else {
+        $manquants++
+        Write-Host "  [!!] $($c.Name) : introuvable dans ce terminal" -ForegroundColor Red
     }
 }
 
-# --- 8. Structure projets ---
-$audioDir = Join-Path $projetDir "projets"
-if (-not (Test-Path $audioDir)) {
-    New-Item -ItemType Directory -Path $audioDir -Force | Out-Null
-}
-
 Write-Host "`n================================================" -ForegroundColor Cyan
-Write-Host "  Installation terminee !" -ForegroundColor Cyan
+if ($manquants -eq 0) {
+    Write-Host "  Installation terminee !" -ForegroundColor Cyan
+} else {
+    Write-Host "  Installation incomplete : FERME et ROUVRE le terminal, puis relance ce script." -ForegroundColor Yellow
+}
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "`n  Projet installe dans : $projetDir" -ForegroundColor White
-Write-Host "  Pour tester : cd $projetDir && node index.js --aide" -ForegroundColor White
-Write-Host "`n  Si FFmpeg vient d'etre installe, FERME et ROUVRE ce terminal." -ForegroundColor Yellow
+Write-Host "`n  Premier essai (sans aucun media a fournir) :" -ForegroundColor White
+Write-Host "    cd `"$projetDir`"" -ForegroundColor White
+Write-Host "    node outils/creer-demo.js" -ForegroundColor White
+Write-Host "    node index.js --projet exemple-deep-focus --test 30" -ForegroundColor White
 Write-Host ""

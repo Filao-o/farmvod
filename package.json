@@ -1,21 +1,24 @@
 {
   "name": "suno-video-compiler",
   "version": "2.0.0",
-  "description": "Compilation automatisee de videos longues (Suno -> YouTube) : normalisation loudness, fondus enchaines, encodage rapide, chapitres, upload prive.",
+  "description": "Compile des pistes audio et une image fixe en video longue pour YouTube : normalisation loudness, fondus enchaines, encodage GPU ou CPU, chapitres, upload en prive.",
   "main": "index.js",
   "scripts": {
     "build": "node index.js",
     "batch": "node index.js --tous",
     "clean": "node index.js --vider-cache",
+    "demo": "node outils/creer-demo.js && node index.js --projet exemple-deep-focus --test 30",
     "app": "electron electron/main.js",
     "start": "electron electron/main.js"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "electron": "^33.0.0"
+    "googleapis": "^144.0.0"
   },
   "optionalDependencies": {
-    "googleapis": "^144.0.0"
+    "electron": "^33.0.0"
   },
   "license": "MIT"
 }

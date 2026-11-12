@@ -55,7 +55,11 @@ async function normaliser(cfg) {
     log.step('Étape 1/5 — Normalisation du volume (loudnorm, 2 passes)');
 
     if (!fs.existsSync(cfg.dossierAudio)) {
-        throw new Error(`Dossier audio absent : ${cfg.dossierAudio}`);
+        throw new Error(
+            `Dossier audio absent : ${cfg.dossierAudio}\n` +
+            `   Crée-le et déposes-y tes pistes (${EXTENSIONS.join(', ')}).\n` +
+            `   Pour un simple essai : node outils/creer-demo.js ${cfg.nom}`
+        );
     }
 
     const fichiers = fs.readdirSync(cfg.dossierAudio)
@@ -63,10 +67,27 @@ async function normaliser(cfg) {
         .sort(naturalSort);
 
     if (fichiers.length === 0) {
-        throw new Error(`Aucun fichier audio dans ${cfg.dossierAudio}`);
+        throw new Error(
+            `Aucun fichier audio dans ${cfg.dossierAudio}\n` +
+            `   Déposes-y tes pistes (${EXTENSIONS.join(', ')}).\n` +
+            `   Pour un simple essai : node outils/creer-demo.js ${cfg.nom}`
+        );
     }
     if (fichiers.length < 3) {
-        log.warn(`Seulement ${fichiers.length} piste(s) : la répétition sera très perceptible sur 3 h.`);
+        log.warn(`Seulement ${fichiers.length} piste(s) : la répétition sera très perceptible, et YouTube exige 3 chapitres minimum.`);
+    }
+
+    // Libellés de chapitres fournis dans projet.json, mappés positionnellement
+    // sur l'ordre de tri naturel (= ordre du 1er passage). On change ainsi un
+    // libellé sans toucher au nom de fichier (donc sans invalider le cache).
+    const libelles = Array.isArray(cfg.metadata && cfg.metadata.chapitres)
+        ? cfg.metadata.chapitres
+        : null;
+    if (libelles && libelles.length && libelles.length !== fichiers.length) {
+        log.warn(
+            `${libelles.length} libellé(s) de chapitre pour ${fichiers.length} piste(s) : ` +
+            `mapping positionnel, les positions sans libellé gardent le nom de fichier.`
+        );
     }
 
     const dossierCache = ensureDir(path.join(cfg.cache, 'normalized'));
@@ -79,7 +100,9 @@ async function normaliser(cfg) {
         // Strip du préfixe numérique de tri ("01-Silence" → "Silence").
         // Les fichiers Suno téléchargés en batch sont préfixés pour l'ordre,
         // mais ce préfixe n'a rien à faire dans les chapitres.
-        const titre = path.parse(fichiers[i]).name.replace(/^\d+[-_\s]+/, '');
+        const titreFichier = path.parse(fichiers[i]).name.replace(/^\d+[-_\s]+/, '');
+        const libelle = libelles && libelles[i] != null ? String(libelles[i]).trim() : '';
+        const titre = libelle !== '' ? libelle : titreFichier;
 
         if (fs.existsSync(sortie)) {
             log.cache(`[${i + 1}/${fichiers.length}] ${titre}`);

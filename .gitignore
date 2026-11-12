@@ -1,6 +1,38 @@
+# ── Dépendances, cache, réglages personnels ───────────────────────────
 node_modules/
 .cache/
+config.local.json
+*.log
+
+# ── Secrets : identifiants Google / jetons YouTube ────────────────────
 credentials/
+client_secret*.json
+token.json
+.env
+.env.*
+
+# ── Médias : jamais dans le dépôt (lourds, et souvent sous droits) ────
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.aac
+*.ogg
+*.opus
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.avi
+
+# ── Projets : seul projet.json est versionné ──────────────────────────
 projets/*/audio/
 projets/*/output/
 projets/*/background.*
+extraits/
+
+# ── Échantillons : compilations de tiers (droit d'auteur) ─────────────
+# Tout est ignoré sauf la doc du dossier.
+echantillons/*
+!echantillons/README.md
+!echantillons/.gitignore
